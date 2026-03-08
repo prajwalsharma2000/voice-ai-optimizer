@@ -17,15 +17,15 @@ function Sidebar() {
   return (
     <aside
       data-testid="sidebar"
-      className="fixed left-0 top-0 h-screen w-64 bg-slate-900/95 backdrop-blur-xl border-r border-white/10 flex flex-col z-30"
+      className="fixed left-0 top-0 h-screen w-64 bg-card border-r border-border flex flex-col z-30"
     >
       <div className="p-5 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
           <Mic2 className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-sm font-bold text-white tracking-tight">Voice AI</h1>
-          <p className="text-[11px] text-gray-400 leading-none">Performance Optimizer</p>
+          <h1 className="text-sm font-bold text-foreground tracking-tight">Voice AI</h1>
+          <p className="text-[11px] text-muted-foreground leading-none">Performance Optimizer</p>
         </div>
       </div>
 
@@ -43,11 +43,11 @@ function Sidebar() {
                     data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                       isActive
-                        ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white border border-blue-500/30"
-                        : "text-gray-400 hover:bg-white/5 hover:text-white"
+                        ? "bg-primary/10 text-primary border border-primary/30"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     }`}
                   >
-                    <item.icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? "text-blue-400" : ""}`} />
+                    <item.icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? "text-primary" : ""}`} />
                     <span className="flex-1">{item.label}</span>
                     {isActive && <ChevronRight className="w-4 h-4 opacity-50" />}
                   </NavLink>
@@ -62,9 +62,9 @@ function Sidebar() {
       </nav>
 
       <div className="p-4">
-        <div className="rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 p-3">
-          <p className="text-xs font-semibold text-white">HighLevel Marketplace</p>
-          <p className="text-[11px] text-gray-400 mt-0.5">AI-Powered Voice Agent Tools</p>
+        <div className="rounded-lg bg-primary/10 border border-primary/20 p-3">
+          <p className="text-xs font-semibold text-primary">HighLevel Marketplace</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">AI-Powered Voice Agent Tools</p>
         </div>
       </div>
     </aside>
@@ -79,14 +79,14 @@ function Header() {
   return (
     <header
       data-testid="header"
-      className="h-14 border-b border-white/10 bg-slate-900/80 backdrop-blur-sm flex items-center justify-between px-6 sticky top-0 z-20"
+      className="h-14 border-b border-border bg-card flex items-center justify-between px-6 sticky top-0 z-20"
     >
       <div className="flex items-center gap-2">
-        <h2 className="text-base font-semibold text-white">{pageTitle}</h2>
+        <h2 className="text-base font-semibold text-foreground">{pageTitle}</h2>
       </div>
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-400 text-xs font-semibold border border-green-500/20" data-testid="ai-status-badge">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs font-semibold border border-success/20" data-testid="ai-status-badge">
+          <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
           AI Ready
         </div>
       </div>
@@ -96,11 +96,11 @@ function Header() {
 
 export default function Layout() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" data-testid="app-layout">
+    <div className="min-h-screen bg-background" data-testid="app-layout">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
       </div>
       <Sidebar />
       <div className="ml-64">
