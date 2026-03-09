@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api"
+   baseURL: "https://voice-ai-optimizer-api.onrender.com/api"
 });
 
 export const runCopilot = (prompt) =>
