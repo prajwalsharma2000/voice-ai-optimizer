@@ -2,6 +2,7 @@ import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { LayoutDashboard, Sparkles, FlaskConical, FileText, Settings, ChevronRight, Mic2 } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import highLevel from '../../public/highlevel.svg';
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -86,7 +87,8 @@ function Header() {
       </div>
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs font-semibold border border-success/20" data-testid="ai-status-badge">
-          <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+          {/* <span className="w-2 h-2 rounded-full bg-success animate-pulse" /> */}
+          <img src={highLevel} className="w-7 h-7 rounded-full" />
           AI Ready
         </div>
       </div>
