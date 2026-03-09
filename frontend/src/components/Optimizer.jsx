@@ -13,7 +13,7 @@ import StatCards from "./StatCards";
 import TestResultsTable from "./TestResultsTable";
 import PromptDiffViewer from "./PromptDiffViewer";
 
-const API = `${'https://voice-ai-optimizer-api.onrender.com/api' || 'http://localhost:5000'}/api`;
+const API = `${'https://voice-ai-optimizer-api.onrender.com' || 'http://localhost:5000'}/api`;
 
 const SAMPLE_PROMPT = `You are a friendly and professional customer support voice AI agent for TechCorp Solutions.
 
