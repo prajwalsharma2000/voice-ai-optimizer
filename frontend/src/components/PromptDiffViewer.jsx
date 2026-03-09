@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { ScrollArea } from "./ui/scroll-area";
-import { Wand2, FileText, ArrowRight, Plus } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
+import { Wand2, FileText, ArrowRight, Plus, Shield, AlertTriangle, TrendingUp } from "lucide-react";
 
 export default function PromptDiffViewer({ originalPrompt, optimization }) {
   if (!optimization) return null;
@@ -10,6 +11,9 @@ export default function PromptDiffViewer({ originalPrompt, optimization }) {
   const optimizedPrompt = optimization.optimized_prompt || "";
   const changes = optimization.changes || [];
   const expectedImprovement = optimization.expected_improvement || "";
+  const confidenceScore = optimization.confidence_score || 0;
+  const productionReady = optimization.production_ready;
+  const remainingRisks = optimization.remaining_risks || [];
 
   return (
     <Card data-testid="prompt-diff-viewer" className="border border-border animate-slide-in-up overflow-hidden">
@@ -19,33 +23,84 @@ export default function PromptDiffViewer({ originalPrompt, optimization }) {
             <Wand2 className="w-4 h-4 text-primary" />
             <CardTitle className="text-base font-display">Prompt Optimization</CardTitle>
           </div>
-          {expectedImprovement && (
-            <Badge
-              data-testid="improvement-badge"
-              className="bg-accent/10 text-accent border-accent/20 text-xs"
-              variant="outline"
-            >
-              {expectedImprovement}
-            </Badge>
-          )}
         </div>
+        <div className="flex items-center gap-2">
+            {confidenceScore > 0 && (
+              <Badge variant="outline" className="bg-primary/5 text-primary border-primary/15 text-xs">
+                <TrendingUp className="w-3 h-3 mr-1" />
+                {confidenceScore}/10 Confidence
+              </Badge>
+            )}
+            {productionReady !== undefined && (
+              <Badge
+                className={`text-xs ${
+                  productionReady
+                    ? "bg-accent/10 text-accent border-accent/20"
+                    : "bg-destructive/10 text-destructive border-destructive/20"
+                }`}
+                variant="outline"
+              >
+                <Shield className="w-3 h-3 mr-1" />
+                {productionReady ? "Production Ready" : "Not Ready"}
+              </Badge>
+            )}
+            {expectedImprovement && (
+              <Badge
+                data-testid="improvement-badge"
+                className="bg-accent/10 text-accent border-accent/20 text-xs"
+                variant="outline"
+              >
+                {expectedImprovement}
+              </Badge>
+            )}
+          </div>
       </CardHeader>
       <CardContent className="p-0">
         {/* Changes summary */}
         {changes.length > 0 && (
           <div className="px-6 pb-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Changes Applied</p>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Changes Applied</p>
+            <Accordion type="single" collapsible className="w-full space-y-2">
               {changes.map((change, i) => (
-                <div
-                  key={i}
-                  data-testid={`change-badge-${i}`}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-accent/5 border border-accent/10 text-xs text-accent"
-                >
-                  <Plus className="w-3 h-3" />
-                  {change.description}
-                </div>
+                <AccordionItem key={i} value={`change-${i}`} className="border border-border rounded-lg px-3">
+                  <AccordionTrigger className="py-2 text-xs hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <Plus className="w-3 h-3 text-accent" />
+                      <span className="text-accent font-medium">{change.description}</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-xs space-y-2 pb-3">
+                    {change.reason && (
+                      <div>
+                        <p className="font-semibold text-muted-foreground mb-1">Reason:</p>
+                        <p className="text-foreground">{change.reason}</p>
+                      </div>
+                    )}
+                    {change.addresses && (
+                      <div>
+                        <p className="font-semibold text-muted-foreground mb-1">Addresses:</p>
+                        <p className="text-foreground">{change.addresses}</p>
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
               ))}
+            </Accordion>
+          </div>
+        )}
+
+        {remainingRisks.length > 0 && (
+          <div className="px-6 pb-4">
+            <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/20">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
+                <p className="text-xs font-semibold text-destructive">Remaining Risks</p>
+              </div>
+              <ul className="list-disc list-inside space-y-1 text-xs text-muted-foreground">
+                {remainingRisks.map((risk, i) => (
+                  <li key={i}>{risk}</li>
+                ))}
+              </ul>
             </div>
           </div>
         )}

@@ -1,5 +1,5 @@
 import { Card, CardContent } from "./ui/card";
-import { TrendingUp, FlaskConical, CheckCircle2, XCircle } from "lucide-react";
+import { TrendingUp, FlaskConical, CheckCircle2, XCircle, Star, Shield } from "lucide-react";
 
 const STAT_CONFIG = [
   {
@@ -34,11 +34,27 @@ const STAT_CONFIG = [
     color: "text-destructive",
     bgColor: "bg-destructive/10",
   },
+  {
+    key: "average_quality_score",
+    label: "Quality Score",
+    icon: Star,
+    format: (v) => `${v}/10`,
+    color: "text-primary",
+    bgColor: "bg-primary/10",
+  },
+  {
+    key: "production_readiness",
+    label: "Production Ready",
+    icon: Shield,
+    format: (v) => v === "READY" ? "Yes" : "No",
+    color: "text-accent",
+    bgColor: "bg-accent/10",
+  },
 ];
 
 export default function StatCards({ evaluation }) {
   return (
-    <div data-testid="stat-cards" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div data-testid="stat-cards" className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {STAT_CONFIG.map((stat, index) => {
         const Icon = stat.icon;
         const value = evaluation ? evaluation[stat.key] : "--";

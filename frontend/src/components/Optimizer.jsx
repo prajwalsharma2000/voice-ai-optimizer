@@ -15,18 +15,13 @@ import PromptDiffViewer from "./PromptDiffViewer";
 
 const API = `${'https://voice-ai-optimizer-api.onrender.com' || 'http://localhost:5000'}/api`;
 
-const SAMPLE_PROMPT = `You are a friendly and professional customer support voice AI agent for TechCorp Solutions.
+const SAMPLE_PROMPT = `You are a customer support AI for TechCorp.
 
-Your responsibilities:
-- Answer customer questions about products and services
-- Help schedule appointments and callbacks  
-- Handle billing inquiries and payment issues
-- Process returns and exchanges
-- Escalate complex issues to human agents
+Answer questions about products.
+Help with billing.
+Schedule appointments.
 
-Tone: Warm, empathetic, and solution-oriented.
-Always greet the customer and ask how you can help.
-If you don't know the answer, offer to transfer to a specialist.`;
+Be helpful.`;
 
 export default function Optimizer() {
   const { addTestRun, addPromptVersion } = useOptimizer();
@@ -314,6 +309,39 @@ const resetState = useCallback(() => {
                 </div>
               </div>
             </div>
+            {(analysis.riskFactors?.length > 0 || analysis.complianceIssues?.length > 0) && (
+              <>
+                <Separator className="my-4" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {analysis.riskFactors?.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Risk Factors</p>
+                      <div className="space-y-1.5">
+                        {analysis.riskFactors.map((risk, i) => (
+                          <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <span className="w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0 mt-1" />
+                            {risk}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {analysis.complianceIssues?.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Compliance Issues</p>
+                      <div className="space-y-1.5">
+                        {analysis.complianceIssues.map((issue, i) => (
+                          <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <span className="w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0 mt-1" />
+                            {issue}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
@@ -337,7 +365,7 @@ const resetState = useCallback(() => {
                   <CardContent className="p-5">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Summary</p>
                     <p className="text-sm text-foreground">{evaluation.summary}</p>
-                    {evaluation.key_findings && (
+                    {evaluation.key_findings && evaluation.key_findings.length > 0 && (
                       <div className="mt-3 space-y-1.5">
                         {evaluation.key_findings.map((finding, i) => (
                           <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -350,10 +378,44 @@ const resetState = useCallback(() => {
                   </CardContent>
                 </Card>
               )}
+              {(evaluation?.critical_failures > 0 || evaluation?.security_issues_count > 0 || evaluation?.compliance_issues_count > 0) && (
+                <Card className="border border-destructive/30 bg-destructive/5" data-testid="critical-issues-card">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-display text-destructive">Critical Issues Detected</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-3">
+                      {evaluation.critical_failures > 0 && (
+                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                          <p className="text-xs text-muted-foreground">Critical Failures</p>
+                          <p className="text-2xl font-bold text-destructive">{evaluation.critical_failures}</p>
+                        </div>
+                      )}
+                      {evaluation.security_issues_count > 0 && (
+                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                          <p className="text-xs text-muted-foreground">Security Issues</p>
+                          <p className="text-2xl font-bold text-destructive">{evaluation.security_issues_count}</p>
+                        </div>
+                      )}
+                      {evaluation.compliance_issues_count > 0 && (
+                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                          <p className="text-xs text-muted-foreground">Compliance Issues</p>
+                          <p className="text-2xl font-bold text-destructive">{evaluation.compliance_issues_count}</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3 p-3 rounded-lg bg-muted/30">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Production Readiness:</strong> {evaluation.production_readiness === "READY" ? "✅ Ready" : "❌ Not Ready"}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="results" className="mt-4">
-              <TestResultsTable results={results} />
+              <TestResultsTable results={evaluation?.evaluations || results} />
             </TabsContent>
 
             <TabsContent value="optimization" className="mt-4">
