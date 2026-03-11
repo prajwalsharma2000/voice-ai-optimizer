@@ -84,11 +84,14 @@ const resetState = useCallback(() => {
         body: JSON.stringify({ prompt: prompt.trim() }),
       });
 
-      if (!response.ok) throw new Error("Pipeline request failed");
+      if (!response.ok) {
+        throw new Error(`Pipeline request failed with status ${response.status}`);
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let pipelineFailed = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -102,9 +105,9 @@ const resetState = useCallback(() => {
           if (line.startsWith("data: ")) {
             try {
               const event = JSON.parse(line.slice(6));
-              const { step, status, data } = event;
+              const { step, status, data, error } = event;
 
-              console.log('SSE Event:', { step, status, data });
+              console.log('SSE Event:', { step, status, data, error });
 
               if (status === "running") {
                 setCurrentStep(step);
@@ -139,17 +142,32 @@ const resetState = useCallback(() => {
               }
 
               if (status === "failed") {
-                toast.error(event.error || "Pipeline step failed");
+                pipelineFailed = true;
+                setStepStatuses((prev) => ({ ...prev, [step]: "failed" }));
+                setCurrentStep(null);
+                toast.error(error || `Pipeline failed at ${step} stage`);
+                console.error(`Pipeline failed at ${step}:`, error);
+                break;
               }
             } catch (e) {
               console.error('Failed to parse SSE event:', line, e);
             }
           }
         }
+
+        if (pipelineFailed) {
+          break;
+        }
+      }
+
+      if (pipelineFailed) {
+        toast.error("Pipeline execution failed. Please try again.");
       }
     } catch (err) {
-      toast.error("Pipeline failed. Please try again.");
-      console.error(err);
+      toast.error("Pipeline failed. Please check your connection and try again.");
+      console.error('Pipeline error:', err);
+      setStepStatuses({});
+      setCurrentStep(null);
     } finally {
       setIsRunning(false);
     }

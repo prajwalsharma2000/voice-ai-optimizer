@@ -88,51 +88,66 @@ export const runCopilot = async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    const sendEvent = (step, status, data = null) => {
-      const event = { step, status, data };
+    const sendEvent = (step, status, data = null, error = null) => {
+      const event = { step, status, data, error };
       console.log('Sending SSE:', event);
       res.write(`data: ${JSON.stringify(event)}\n\n`);
     };
 
-    // 1️⃣ Analyze Prompt
-    sendEvent('analyze', 'running');
-    const analysis = await analyzePromptService(prompt);
-    console.log('Analysis result:', analysis);
-    sendEvent('analyze', 'completed', analysis);
+    try {
+      // 1️⃣ Analyze Prompt
+      sendEvent('analyze', 'running');
+      const analysis = await analyzePromptService(prompt);
+      console.log('Analysis result:', analysis);
+      sendEvent('analyze', 'completed', analysis);
 
-    // 2️⃣ Generate Tests
-    sendEvent('generate', 'running');
-    const testCaseResponse = await generateTestsService(prompt, analysis);
-    const testCases = testCaseResponse.testCases;
-    console.log('Test cases generated:', testCases?.length);
-    sendEvent('generate', 'completed', testCases);
+      // 2️⃣ Generate Tests
+      sendEvent('generate', 'running');
+      const testCaseResponse = await generateTestsService(prompt, analysis);
+      const testCases = testCaseResponse.testCases;
+      console.log('Test cases generated:', testCases?.length);
+      sendEvent('generate', 'completed', testCases);
 
-    // 3️⃣ Run Tests
-    sendEvent('simulate', 'running');
-    const results = await runTestsService(prompt, testCases);
-    console.log('Test results:', results?.length);
-    sendEvent('simulate', 'completed', results);
+      // 3️⃣ Run Tests
+      sendEvent('simulate', 'running');
+      const results = await runTestsService(prompt, testCases);
+      console.log('Test results:', results?.length);
+      sendEvent('simulate', 'completed', results);
 
-    // 4️⃣ Evaluate
-    sendEvent('evaluate', 'running');
-    const evaluation = await evaluateResultsService(
-      results,
-      analysis.successCriteria || []
-    );
-    console.log('Evaluation:', evaluation);
-    sendEvent('evaluate', 'completed', evaluation);
+      // 4️⃣ Evaluate
+      sendEvent('evaluate', 'running');
+      const evaluation = await evaluateResultsService(
+        results,
+        analysis.successCriteria || []
+      );
+      console.log('Evaluation:', evaluation);
+      sendEvent('evaluate', 'completed', evaluation);
 
-    // 5️⃣ Optimize
-    sendEvent('optimize', 'running');
-    const optimization = await optimizePromptService(
-      prompt,
-      evaluation.evaluations
-    );
-    console.log('Optimization:', optimization);
-    sendEvent('optimize', 'completed', optimization);
+      // 5️⃣ Optimize
+      sendEvent('optimize', 'running');
+      const optimization = await optimizePromptService(
+        prompt,
+        evaluation.evaluations
+      );
+      console.log('Optimization:', optimization);
+      sendEvent('optimize', 'completed', optimization);
 
-    sendEvent('complete', 'completed');
-    res.end();
+      sendEvent('complete', 'completed');
+      res.end();
+    } catch (stepError) {
+      console.error('Pipeline step error:', stepError);
+      
+      // Determine which step failed based on current state
+      let failedStep = 'unknown';
+      if (!analysis) failedStep = 'analyze';
+      else if (!testCases) failedStep = 'generate';
+      else if (!results) failedStep = 'simulate';
+      else if (!evaluation) failedStep = 'evaluate';
+      else failedStep = 'optimize';
+      
+      sendEvent(failedStep, 'failed', null, stepError.message || 'Pipeline execution failed');
+      res.end();
+    }
 
   } catch (error) {
 

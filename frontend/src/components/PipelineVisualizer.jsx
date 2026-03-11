@@ -1,4 +1,4 @@
-import { Search, FlaskConical, Play, BarChart3, Wand2, Check, Loader2 } from "lucide-react";
+import { Search, FlaskConical, Play, BarChart3, Wand2, Check, Loader2, X } from "lucide-react";
 
 const STEPS = [
   { key: "analyze", label: "Analyze Prompt", icon: Search },
@@ -18,7 +18,8 @@ export default function PipelineVisualizer({ currentStep, stepStatuses }) {
 
           const isCompleted = status === "completed";
           const isRunning = status === "running";
-          const isPending = status === "pending";
+          const isFailed = status === "failed";
+          const isPending = !isCompleted && !isRunning && !isFailed;
 
           return (
             <div key={step.key} className="flex items-center flex-1 last:flex-none">
@@ -30,6 +31,8 @@ export default function PipelineVisualizer({ currentStep, stepStatuses }) {
                       ? "bg-accent text-white ring-4 ring-accent/20"
                       : isRunning
                       ? "bg-primary text-white ring-4 ring-primary/20 animate-pulse-ring"
+                      : isFailed
+                      ? "bg-destructive text-white ring-4 ring-destructive/20"
                       : "bg-muted text-muted-foreground"
                   }`}
                 >
@@ -37,6 +40,8 @@ export default function PipelineVisualizer({ currentStep, stepStatuses }) {
                     <Check className="w-5 h-5" />
                   ) : isRunning ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : isFailed ? (
+                    <X className="w-5 h-5" />
                   ) : (
                     <Icon className="w-5 h-5" />
                   )}
@@ -47,6 +52,8 @@ export default function PipelineVisualizer({ currentStep, stepStatuses }) {
                       ? "text-accent"
                       : isRunning
                       ? "text-primary font-semibold"
+                      : isFailed
+                      ? "text-destructive font-semibold"
                       : "text-muted-foreground"
                   }`}
                 >
@@ -58,7 +65,7 @@ export default function PipelineVisualizer({ currentStep, stepStatuses }) {
                 <div className="flex-1 h-[2px] bg-muted mx-3 mt-[-20px] relative overflow-hidden">
                   <div
                     className={`absolute inset-y-0 left-0 transition-all duration-700 ease-out ${
-                      isCompleted ? "w-full bg-accent" : isRunning ? "w-1/2 bg-primary animate-shimmer" : "w-0"
+                      isCompleted ? "w-full bg-accent" : isRunning ? "w-1/2 bg-primary animate-shimmer" : isFailed ? "w-full bg-destructive" : "w-0"
                     }`}
                   />
                 </div>
